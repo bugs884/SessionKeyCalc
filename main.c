@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
 	mbedtls_aes_context context_in,context_out;
 	unsigned char FNwkSIntKey[16],SNwkSIntKey[16];
 	unsigned char input[16],key[16];
-	/*Hardcoded IV? look for options*/
+	/*Random Hardcoded IV. IV is changed after every use. Hence fresh IV is used to keep consistency for validation*/
 	unsigned char iv[16] = { 14, 31, 6, 126, 18, 12, 36, 70, 100, 9, 42, 51, 111, 84, 3, 25 };
 	unsigned char iv2[16] = { 14, 31, 6, 126, 18, 12, 36, 70, 100, 9, 42, 51, 111, 84, 3, 25 };
 	
@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
 	#if VALIDATE
 	/*IV for decryption */
 	unsigned char decrypt1[16],decrypt2[16];
-	
+	/*Same IV as encryption to validate the program*/
 	unsigned char iv3[16] = { 14, 31, 6, 126, 18, 12, 36, 70, 100, 9, 42, 51, 111, 84, 3, 25 };
 	unsigned char iv4[16] = { 14, 31, 6, 126, 18, 12, 36, 70, 100, 9, 42, 51, 111, 84, 3, 25 };
 	#endif
