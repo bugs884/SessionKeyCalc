@@ -7,7 +7,24 @@
 
 #define VALIDATE_YES 1	/* Validate encryption*/
 #define VALIDATE_NO 0	/* DONT validate encryption*/
-#define VALIDATE VALIDATE_NO 
+#define VALIDATE VALIDATE_NO
+
+#define USAGE   \
+    "\n  ./nwksintkeys <NwkKey> <JoinNonce> <JoinEUI> <DevNonce>\n" \
+    "\n  example: ./nwksintkeys 01020304050607080102030405060708 010203 0102030405060708 0102\n" \
+    "\n"
+
+#define INSIZE   \
+    "\n   Expected input argument size"\
+    "\n  <NwkKey>       : 16 BYTES"\
+    "\n  <JoinNonce>    : 3 BYTES"\
+    "\n  <JoinEUI>      : 8 BYTES"\
+    "\n  <DevNonce>     : 2 BYTES" \
+    "\n"
+
+#define uchar unsigned char *
+#define cchar const char *
+
 
 /**
  * \brief          		This Function is called to convert input string to hex byte array.
@@ -39,3 +56,5 @@ void strtohex(unsigned char *ascii_ptr,unsigned char *hex_ptr, int len);
  *						
  */
 void mergeargs(unsigned char *Stype,unsigned char *arg1,unsigned char *arg2,unsigned char *arg3, unsigned char *ret);
+
+int parseinput(unsigned char *input);

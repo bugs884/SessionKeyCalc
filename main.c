@@ -11,22 +11,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define USAGE   \
-    "\n  ./nwksintkeys <NwkKey> <JoinNonce> <JoinEUI> <DevNonce>\n" \
-    "\n  example: ./nwksintkeys 01020304050607080102030405060708 010203 0102030405060708 0102\n" \
-    "\n"
-
 
 int main(int argc, char *argv[])
 {
 	/* AES variables*/
-	mbedtls_aes_context context_in,context_out;
+	mbedtls_aes_context context_in;
 	unsigned char FNwkSIntKey[16],SNwkSIntKey[16];
 	unsigned char input[16],key[16];
-	/*Random Hardcoded IV. IV is changed after every use. Hence fresh IV is used to keep consistency for validation*/
-	unsigned char iv[16] = { 14, 31, 6, 126, 18, 12, 36, 70, 100, 9, 42, 51, 111, 84, 3, 25 };
-	unsigned char iv2[16] = { 14, 31, 6, 126, 18, 12, 36, 70, 100, 9, 42, 51, 111, 84, 3, 25 };
-	
+
 	int argcount = 5;
 
 	/*
@@ -35,10 +27,8 @@ int main(int argc, char *argv[])
 	 */
 	#if VALIDATE
 	/*IV for decryption */
+	mbedtls_aes_context context_out;
 	unsigned char decrypt1[16],decrypt2[16];
-	/*Same IV as encryption to validate the program*/
-	unsigned char iv3[16] = { 14, 31, 6, 126, 18, 12, 36, 70, 100, 9, 42, 51, 111, 84, 3, 25 };
-	unsigned char iv4[16] = { 14, 31, 6, 126, 18, 12, 36, 70, 100, 9, 42, 51, 111, 84, 3, 25 };
 	#endif
 	/*End VALIDATE*/
 
@@ -48,15 +38,23 @@ int main(int argc, char *argv[])
      */
 
 	if(argcount!=argc)
-		{
-			printf("\n   USAGE:\n");
-			printf(USAGE);
-			return 1;
-		}
+	{
+		printf("\n   USAGE:\n");
+		printf(USAGE);
+		return 1;
+	}
+	else if(parseinput((uchar)argv[1])!=32||parseinput((uchar)argv[2])!=6||parseinput((uchar)argv[3])!=16||parseinput((uchar)argv[4])!=4)
+	{	
+		printf("\n   Wrong input argument size or Unknown character in arguments");
+		printf(INSIZE);
+		printf("\n   %s accepts only HEX arguments (0-9,A-F,a-f)\n",argv[0]);
+		return 1;
+	}
 	else 
 	{
 		/* Copy key as hex into variable key*/
-		strtohex(argv[1],key,strlen(argv[1]));
+		strtohex((uchar)argv[1],key,parseinput((uchar)argv[1]));
+
 		/* Set key for encryption in AES context*/
 		mbedtls_aes_setkey_enc( &context_in, key, 128 );
 
@@ -67,15 +65,15 @@ int main(int argc, char *argv[])
 		 *	FNwkSIntKey = aes128_encrypt(NwkKey, 0x01 | JoinNonce | JoinEUI | DevNonce | pad 16 )
 		 *	Pads zeros at the end to make the lenght multiple of 16
 		 */
-		mergeargs("01",argv[2],argv[3],argv[4],input);
-		
+		mergeargs((uchar)"01",(uchar)argv[2],(uchar)argv[3],(uchar)argv[4],input);
+
 		/* AES CBC mode used for Encryption. IV is hardcoded into the application and reset before reuse*/
-		mbedtls_aes_crypt_cbc( &context_in, MBEDTLS_AES_ENCRYPT, 16, iv, input, FNwkSIntKey );
+		mbedtls_aes_crypt_ecb( &context_in, MBEDTLS_AES_ENCRYPT, input, FNwkSIntKey );
   		
   		printf("\nFNwkSIntKey:");
   		for(int i=0;i<16;i++)
   		{
-  			printf("%x",FNwkSIntKey[i]);
+  			printf("%.2X",FNwkSIntKey[i]);
   		} 	
   		
 		/* CALCLULATE SNwkSIntKey
@@ -84,14 +82,14 @@ int main(int argc, char *argv[])
 		 *	SNwkSIntKey = aes128_encrypt(NwkKey, 0x03 | JoinNonce | JoinEUI | DevNonce | pad 16 )
 		 *	Pads zeros at the end to make the lenght multiple of 16
 		 */
-  		mergeargs("03",argv[2],argv[3],argv[4],input);
+  		mergeargs((uchar)"03",(uchar)argv[2],(uchar)argv[3],(uchar)argv[4],(uchar)input);
   		/*Use a fresh IV*/
-		mbedtls_aes_crypt_cbc( &context_in, MBEDTLS_AES_ENCRYPT, 16, iv2, input, SNwkSIntKey );
+		mbedtls_aes_crypt_ecb( &context_in, MBEDTLS_AES_ENCRYPT, input, SNwkSIntKey );
 
 		printf("\nSNwkSIntKey:");
   		for(int i=0;i<16;i++)
   		{
-  			printf("%x",SNwkSIntKey[i]);
+  			printf("%.2X",SNwkSIntKey[i]);
   		} 
   		printf("\n");
   		/* Validation Code. Decrypt of encrypted keys. */
@@ -99,26 +97,24 @@ int main(int argc, char *argv[])
   		/* Validate encrypted data*/
   		/*Use same IV for decryption*/   
   		mbedtls_aes_setkey_dec( &context_out, key, 128 );
-  		mbedtls_aes_crypt_cbc( &context_out, MBEDTLS_AES_DECRYPT, 16, iv3, FNwkSIntKey, decrypt1 ); 
+  		mbedtls_aes_crypt_ecb( &context_out, MBEDTLS_AES_DECRYPT, FNwkSIntKey, decrypt1 ); 
       	printf("\n\nFNwkSIntKey_DataPayload:");
   		for(int i=0;i<16;i++)
   		{
-  			printf("%x",decrypt1[i]);
+  			printf("%.2X",decrypt1[i]);
   		}
   		mbedtls_aes_setkey_dec( &context_out, key, 128 );
-  		mbedtls_aes_crypt_cbc( &context_out, MBEDTLS_AES_DECRYPT, 16, iv4, SNwkSIntKey, decrypt2 ); 
+  		mbedtls_aes_crypt_ecb( &context_out, MBEDTLS_AES_DECRYPT, SNwkSIntKey, decrypt2 ); 
       	printf("\nSNwkSIntKey_DataPayload:");
   		for(int i=0;i<16;i++)
   		{
-  			printf("%x",decrypt2[i]);
+  			printf("%.2X",decrypt2[i]);
   		}
+  		printf("\n");
   		#endif 
   		/*End VALIDATE*/
   		return 0;
 	}
-
-
-
 }
 
 /*	
@@ -143,11 +139,56 @@ void mergeargs(unsigned char *Stype,unsigned char *arg1,unsigned char *arg2,unsi
 {
 		int index=1;
 		strtohex(Stype,ret,2);
-		strtohex(arg1,ret+index,strlen(arg1));
-		index += (strlen(arg1)/2);
-		strtohex(arg2,ret+index,strlen(arg2));
-		index += (strlen(arg2)/2);
-		strtohex(arg3,ret+index,strlen(arg3));
-		index += (strlen(arg3)/2);
-		strtohex("0000",ret+index,4);
+		int len1,len2,len3;
+		/*
+		 *	Convert each byte equivalent in string to HEX
+		 *	Takes care of endianness for the data that is used for encryption
+		 */
+		len1 = parseinput((uchar)arg1);
+		for(int i=0;i<len1;)
+		{
+			strtohex(arg1+len1-2-i,ret+index+(i/2),2);
+			i+=2;
+		}
+		/*Update index to point to next location in Byte array*/
+		index += len1/2;
+		len2 = parseinput((uchar)arg2);
+		for(int i=0;i<len2;)
+		{
+			strtohex(arg2+len2-2-i,ret+index+(i/2),2);
+			i+=2;
+		}
+		index += len2/2;
+		len3 = parseinput((uchar)arg3);
+		for(int i=0;i<len3;)
+		{
+			strtohex(arg3+len3-2-i,ret+index+(i/2),2);
+			i+=2;
+		}
+		index += len3/2;
+		/*
+		 *	Pad16 equivalent
+		 *	Pads 2 octets of 00s to make it 16 size
+		 *	Since all arguments are fixed length padding is fixed and simple
+		 */
+		strtohex((uchar)"0000",ret+index,4);
+}
+
+int parseinput(unsigned char *input)
+{
+    unsigned char *checkinp = input;
+    int len=0;
+    while (*checkinp != 0)
+    {
+        if (('A' <= *checkinp && *checkinp <= 'F') || ('a' <= *checkinp && *checkinp <= 'f') || ('0' <= *checkinp && *checkinp <= '9'))
+        {
+            ++checkinp;
+            len++;
+        } 
+        else 
+        {
+            return -1;
+        }
+    }
+    return len;
 }
