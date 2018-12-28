@@ -45,14 +45,8 @@ Example input and output shown below.
 ```
 ./nwksintkeys 01020304050607080102030405060708 010203 0102030405060708 0102
 
-FNwkSIntKey:5de339b2a6c06c2633c49a3e861fb170
-SNwkSIntKey:f5606d63eca5ea4c3372406f2f3fcd2b
+FNwkSIntKey:F10D472ABD59C2DC70EB4C2E2D4953AF
+SNwkSIntKey:AB8A3BA2E35DEC52A4669BECF3AAF71B
+
 ```
 
-Use make clean for cleaning the build.
-
-##Assumptions
-
-* Initialization Vector for encryption is fixed and random. It is hardcoded into applications for simplicity.
-
-* Validation of encryption is done by decrypting using same keys and IV. 

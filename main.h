@@ -21,7 +21,8 @@
     "\n  <JoinEUI>      : 8 BYTES"\
     "\n  <DevNonce>     : 2 BYTES" \
     "\n"
-
+    
+/* Explicit Type casts*/
 #define uchar unsigned char *
 #define cchar const char *
 
@@ -57,4 +58,14 @@ void strtohex(unsigned char *ascii_ptr,unsigned char *hex_ptr, int len);
  */
 void mergeargs(unsigned char *Stype,unsigned char *arg1,unsigned char *arg2,unsigned char *arg3, unsigned char *ret);
 
+/**
+ * \brief          		Function that validates if the string is a valid hex number and returns its length
+ *
+ *
+ * \param *input 	    Pointer to character array that needs to be parsed 
+ *
+ * \return 		   		Returns length of the string IF all characters are valid HEX digits
+ *						ELSE returns -1 
+ *						
+ */
 int parseinput(unsigned char *input);

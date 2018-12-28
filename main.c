@@ -26,7 +26,6 @@ int main(int argc, char *argv[])
 	 * Use VALIDATE compiler switch for turning ON/OFF feature
 	 */
 	#if VALIDATE
-	/*IV for decryption */
 	mbedtls_aes_context context_out;
 	unsigned char decrypt1[16],decrypt2[16];
 	#endif
@@ -36,7 +35,6 @@ int main(int argc, char *argv[])
      * Parse the command-line arguments.
      * Expects exactly 4 arguments.
      */
-
 	if(argcount!=argc)
 	{
 		printf("\n   USAGE:\n");
@@ -67,7 +65,7 @@ int main(int argc, char *argv[])
 		 */
 		mergeargs((uchar)"01",(uchar)argv[2],(uchar)argv[3],(uchar)argv[4],input);
 
-		/* AES CBC mode used for Encryption. IV is hardcoded into the application and reset before reuse*/
+		/* AES ECB mode used for Encryption.*/
 		mbedtls_aes_crypt_ecb( &context_in, MBEDTLS_AES_ENCRYPT, input, FNwkSIntKey );
   		
   		printf("\nFNwkSIntKey:");
@@ -83,7 +81,7 @@ int main(int argc, char *argv[])
 		 *	Pads zeros at the end to make the lenght multiple of 16
 		 */
   		mergeargs((uchar)"03",(uchar)argv[2],(uchar)argv[3],(uchar)argv[4],(uchar)input);
-  		/*Use a fresh IV*/
+
 		mbedtls_aes_crypt_ecb( &context_in, MBEDTLS_AES_ENCRYPT, input, SNwkSIntKey );
 
 		printf("\nSNwkSIntKey:");
@@ -95,7 +93,6 @@ int main(int argc, char *argv[])
   		/* Validation Code. Decrypt of encrypted keys. */
   		#if VALIDATE
   		/* Validate encrypted data*/
-  		/*Use same IV for decryption*/   
   		mbedtls_aes_setkey_dec( &context_out, key, 128 );
   		mbedtls_aes_crypt_ecb( &context_out, MBEDTLS_AES_DECRYPT, FNwkSIntKey, decrypt1 ); 
       	printf("\n\nFNwkSIntKey_DataPayload:");
@@ -173,7 +170,9 @@ void mergeargs(unsigned char *Stype,unsigned char *arg1,unsigned char *arg2,unsi
 		 */
 		strtohex((uchar)"0000",ret+index,4);
 }
-
+/*	
+ *	Function that validates if the string is a valid hex number and returns its length
+ */
 int parseinput(unsigned char *input)
 {
     unsigned char *checkinp = input;
