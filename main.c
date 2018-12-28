@@ -12,8 +12,8 @@
 #include <stdlib.h>
 
 #define USAGE   \
-    "\n  ./sessionkeycalc <NwkKey> <JoinNonce> <JoinEUI> <DevNonce>\n" \
-    "\n  example: ./sessionkeycalc 01020304050607080102030405060708 010203 0102030405060708 0102\n" \
+    "\n  ./nwksintkeys <NwkKey> <JoinNonce> <JoinEUI> <DevNonce>\n" \
+    "\n  example: ./nwksintkeys 01020304050607080102030405060708 010203 0102030405060708 0102\n" \
     "\n"
 
 
@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
 
 	if(argcount!=argc)
 		{
-			printf("\n   ERROR: Wrong number of arguments\n");
+			printf("\n   USAGE:\n");
 			printf(USAGE);
 			return 1;
 		}

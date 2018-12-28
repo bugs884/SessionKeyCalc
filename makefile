@@ -6,3 +6,5 @@ default: all
 all: main.c
 	$(CC) -o nwksintkeys main.c $(CFLAGS)	
 
+clean:
+	rm -f nwksintkeys

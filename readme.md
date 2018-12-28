@@ -48,3 +48,11 @@ Example input and output shown below.
 FNwkSIntKey:5de339b2a6c06c2633c49a3e861fb170
 SNwkSIntKey:f5606d63eca5ea4c3372406f2f3fcd2b
 ```
+
+Use make clean for cleaning the build.
+
+##Assumptions
+
+* Initialization Vector for encryption is fixed and random. It is hardcoded into applications for simplicity.
+
+* Validation of encryption is done by decrypting using same keys and IV. 
